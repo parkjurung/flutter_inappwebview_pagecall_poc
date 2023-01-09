@@ -1447,6 +1447,11 @@ public class InAppWebView: PagecallWebView, UIScrollViewDelegate, WKUIDelegate, 
         return result;
     }
     
+    @available(iOS 15.0, *)
+        public func webView(_ webView: WKWebView, requestMediaCapturePermissionFor origin: WKSecurityOrigin, initiatedByFrame frame: WKFrameInfo, type: WKMediaCaptureType, decisionHandler: @escaping (WKPermissionDecision) -> Void) {
+            decisionHandler(.grant)
+        }
+
     @available(iOS 13.0, *)
     public func webView(_ webView: PagecallWebView,
                  decidePolicyFor navigationAction: WKNavigationAction,
