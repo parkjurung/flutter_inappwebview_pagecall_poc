@@ -14,7 +14,8 @@ A new Flutter plugin.
   s.author           = { 'Your Company' => 'email@example.com' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
-  s.resources = 'Storyboards/**/*.storyboard'
+  # s.resources = 'Storyboards/**/*.storyboard'
+  s.resources = 'Classes/**/*.js'
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
 
@@ -23,6 +24,7 @@ A new Flutter plugin.
   s.swift_version = '5.0'
 
   s.dependency 'OrderedSet', '~>5.0'
+  s.dependency 'AmazonChimeSDK-Bitcode'
   
   s.default_subspec = 'Core'
   

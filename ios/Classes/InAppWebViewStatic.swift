@@ -37,7 +37,7 @@ class InAppWebViewStatic: NSObject, FlutterPlugin {
             case "handlesURLScheme":
                 let urlScheme = arguments!["urlScheme"] as! String
                 if #available(iOS 11.0, *) {
-                    result(WKWebView.handlesURLScheme(urlScheme))
+                    result(PagecallWebView.handlesURLScheme(urlScheme))
                 } else {
                     result(false)
                 }
@@ -50,7 +50,7 @@ class InAppWebViewStatic: NSObject, FlutterPlugin {
     
     static public func getDefaultUserAgent(completionHandler: @escaping (_ value: String?) -> Void) {
         if defaultUserAgent == nil {
-            InAppWebViewStatic.webViewForUserAgent = WKWebView()
+            InAppWebViewStatic.webViewForUserAgent = PagecallWebView()
             InAppWebViewStatic.webViewForUserAgent?.evaluateJavaScript("navigator.userAgent") { (value, error) in
 
                 if error != nil {
