@@ -16,8 +16,8 @@
  */
 
 #import "InAppWebViewFlutterPlugin.h"
-#if __has_include(<flutter_inappwebview/flutter_inappwebview-Swift.h>)
-#import <flutter_inappwebview/flutter_inappwebview-Swift.h>
+#if __has_include(<flutter_inappwebview_pagecall/flutter_inappwebview_pagecall-Swift.h>)
+#import <flutter_inappwebview_pagecall/flutter_inappwebview_pagecall-Swift.h>
 #else
 // Support project import fallback if the generated compatibility header
 // is not copied when this plugin is created as a library.

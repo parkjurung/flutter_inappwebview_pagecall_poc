@@ -4,7 +4,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_inappwebview/src/util.dart';
+import 'package:flutter_inappwebview_pagecall/src/util.dart';
 
 import 'chrome_safari_browser_options.dart';
 

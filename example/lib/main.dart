@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_inappwebview_pagecall/flutter_inappwebview_pagecall.dart';
 
 import 'package:flutter_inappwebview_example/chrome_safari_browser_example.screen.dart';
 import 'package:flutter_inappwebview_example/headless_in_app_webview.screen.dart';

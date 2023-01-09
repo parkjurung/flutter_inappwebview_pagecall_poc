@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:flutter_inappwebview/src/util.dart';
+import 'package:flutter_inappwebview_pagecall/src/util.dart';
 
 import '../../types.dart';
 

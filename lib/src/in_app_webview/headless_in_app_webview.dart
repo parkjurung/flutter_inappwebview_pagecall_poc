@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_inappwebview/src/util.dart';
+import 'package:flutter_inappwebview_pagecall/src/util.dart';
 
 import '../context_menu.dart';
 import '../types.dart';

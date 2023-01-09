@@ -4,7 +4,7 @@ import 'dart:io';
 // import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_inappwebview_pagecall/flutter_inappwebview_pagecall.dart';
 // import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
