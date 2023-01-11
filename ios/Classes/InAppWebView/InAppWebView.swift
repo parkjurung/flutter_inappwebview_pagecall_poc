@@ -9,7 +9,7 @@ import Flutter
 import Foundation
 import WebKit
 
-public class InAppWebView: PagecallWebView, UIScrollViewDelegate, WKUIDelegate, WKNavigationDelegate, UIGestureRecognizerDelegate, PullToRefreshDelegate, WKScriptMessageHandler {
+public class InAppWebView: PagecallWebView, UIScrollViewDelegate, WKUIDelegate, WKNavigationDelegate, UIGestureRecognizerDelegate, PullToRefreshDelegate/*, WKScriptMessageHandler */ {
 
     var windowId: Int64?
     var windowCreated = false
@@ -2695,8 +2695,8 @@ if(window.\(JAVASCRIPT_BRIDGE_NAME)[\(_callHandlerID)] != null) {
 //        channel?.invokeMethod("onContextMenuWillPresentForElement", arguments: arguments)
 //    }
     
-    public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-//        super.userContentController(userContentController, didReceive: message)
+    public override func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        super.userContentController(userContentController, didReceive: message)
         if message.name.starts(with: "console") {
             var messageLevel = 1
             switch (message.name) {
