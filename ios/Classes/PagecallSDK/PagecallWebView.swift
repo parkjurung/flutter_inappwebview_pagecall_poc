@@ -22,9 +22,9 @@ public class PagecallWebView: WKWebView, WKScriptMessageHandler {
         // if #available(iOS 13.0, *) {
         //     configuration.defaultWebpagePreferences.preferredContentMode = .mobile
         // }
-         if #available(iOS 14.0, *) {
-             configuration.limitsNavigationsToAppBoundDomains = true
-         }
+//         if #available(iOS 14.0, *) {
+//             configuration.limitsNavigationsToAppBoundDomains = true
+//         }
         super.init(frame: frame, configuration: configuration)
         self.nativeBridge = .init(webview: self)
         

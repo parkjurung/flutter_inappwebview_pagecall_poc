@@ -13,3 +13,7 @@
 ## 0.0.6
 
 - remove limitsNavigationsToAppBoundDomains (navigation problem)
+
+## 0.0.7
+
+- enable window.open in webview
