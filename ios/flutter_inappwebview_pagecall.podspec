@@ -16,6 +16,7 @@ A new Flutter plugin.
   s.source_files = 'Classes/**/*'
   # s.resources = 'Storyboards/**/*.storyboard'
   s.resources = 'Classes/**/*.js'
+  s.resources = '**/*.js'
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
 

@@ -22,18 +22,18 @@ public class PagecallWebView: WKWebView, WKScriptMessageHandler {
         if #available(iOS 13.0, *) {
             configuration.defaultWebpagePreferences.preferredContentMode = .mobile
         }
-        if #available(iOS 14.0, *) {
-            configuration.limitsNavigationsToAppBoundDomains = true
-        }
+        // if #available(iOS 14.0, *) {
+        //     configuration.limitsNavigationsToAppBoundDomains = true
+        // }
         super.init(frame: frame, configuration: configuration)
         self.nativeBridge = .init(webview: self)
         
         self.allowsBackForwardNavigationGestures = false
         
-        if #available(iOS 15.0, *) {
-            let osVersion = UIDevice.current.systemVersion
-            self.customUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/\(osVersion) Safari/605.1.15"
-        }
+//        if #available(iOS 15.0, *) {
+//            let osVersion = UIDevice.current.systemVersion
+//            self.customUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/\(osVersion) Safari/605.1.15"
+//        }
         if let path = Bundle(for: PagecallWebView.self).path(forResource: "PagecallNative", ofType: "js")
         {
             if let bindingJS = try? String(contentsOfFile: path, encoding: .utf8) {
