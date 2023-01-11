@@ -25,7 +25,8 @@ A new Flutter plugin.
   s.swift_version = '5.0'
 
   s.dependency 'OrderedSet', '~>5.0'
-  s.dependency 'AmazonChimeSDK-Bitcode'
+  s.dependency 'AmazonChimeSDK-No-Bitcode', '0.22.0'
+  s.dependency 'AmazonChimeSDKMedia-No-Bitcode', '0.17.4'
   
   s.default_subspec = 'Core'
   

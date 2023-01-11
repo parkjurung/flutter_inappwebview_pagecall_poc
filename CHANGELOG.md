@@ -17,3 +17,7 @@
 ## 0.0.7
 
 - enable window.open in webview
+
+## 0.0.8
+
+- fix AmazonChimeSDK(-Media) version
