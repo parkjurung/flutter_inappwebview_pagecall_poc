@@ -22,8 +22,10 @@ class _InAppWebViewExampleScreenState extends State<InAppWebViewExampleScreen> {
   InAppWebViewController? webViewController;
   InAppWebViewGroupOptions options = InAppWebViewGroupOptions(
       crossPlatform: InAppWebViewOptions(
-          useShouldOverrideUrlLoading: true,
-          mediaPlaybackRequiresUserGesture: false),
+          // useShouldOverrideUrlLoading: true,
+          mediaPlaybackRequiresUserGesture: false,
+          javaScriptEnabled: true
+          ),
       android: AndroidInAppWebViewOptions(
         useHybridComposition: true,
       ),
@@ -118,7 +120,7 @@ class _InAppWebViewExampleScreenState extends State<InAppWebViewExampleScreen> {
                   key: webViewKey,
                   // contextMenu: contextMenu,
                   initialUrlRequest:
-                      URLRequest(url: Uri.parse("https://github.com/flutter")),
+                      URLRequest(url: Uri.parse("https://demo.pagecall.net/join/dajagan/221111abc?build=jurung230111&template=Qanda&autoproduce=1")),
                   // initialFile: "assets/index.html",
                   initialUserScripts: UnmodifiableListView<UserScript>([]),
                   initialOptions: options,

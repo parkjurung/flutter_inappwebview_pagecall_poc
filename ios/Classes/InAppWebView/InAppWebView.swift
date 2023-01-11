@@ -9,7 +9,7 @@ import Flutter
 import Foundation
 import WebKit
 
-public class InAppWebView: PagecallWebView, UIScrollViewDelegate, WKUIDelegate, WKNavigationDelegate, UIGestureRecognizerDelegate, PullToRefreshDelegate {
+public class InAppWebView: PagecallWebView, UIScrollViewDelegate, WKUIDelegate, WKNavigationDelegate, UIGestureRecognizerDelegate, PullToRefreshDelegate, WKScriptMessageHandler {
 
     var windowId: Int64?
     var windowCreated = false
@@ -58,7 +58,7 @@ public class InAppWebView: PagecallWebView, UIScrollViewDelegate, WKUIDelegate, 
     var callAsyncJavaScriptBelowIOS14Results: [String:((Any?) -> Void)] = [:]
     
     var oldZoomScale = Float(1.0)
-    
+
     init(frame: CGRect, configuration: WKWebViewConfiguration, contextMenu: [String: Any]?, channel: FlutterMethodChannel?, userScripts: [UserScript] = []) {
         super.init(frame: frame, configuration: configuration)
         self.channel = channel
@@ -77,8 +77,9 @@ public class InAppWebView: PagecallWebView, UIScrollViewDelegate, WKUIDelegate, 
         panGestureRecognizer = UIPanGestureRecognizer()
         panGestureRecognizer.delegate = self
         panGestureRecognizer.addTarget(self, action: #selector(endDraggingDetected))
+        
     }
-    
+
     override public var frame: CGRect {
         get {
             return super.frame
@@ -153,7 +154,7 @@ public class InAppWebView: PagecallWebView, UIScrollViewDelegate, WKUIDelegate, 
         }
         
         if sender == longPressRecognizer {
-            // To prevent the tapped link from proceeding with navigation, "cancel" the native WKWebView
+            // To prevent the tapped link from proceeding with navigation, "cancel" the native PagecallWebView
             // `_highlightLongPressRecognizer`. This preserves the original behavior as seen here:
             // https://github.com/WebKit/webkit/blob/d591647baf54b4b300ca5501c21a68455429e182/Source/WebKit/UIProcess/ios/WKContentViewInteraction.mm#L1600-L1614
             if let nativeHighlightLongPressRecognizer = nativeHighlightLongPressRecognizer,
@@ -288,17 +289,17 @@ public class InAppWebView: PagecallWebView, UIScrollViewDelegate, WKUIDelegate, 
         scrollView.addObserver(self, forKeyPath: #keyPath(UIScrollView.zoomScale), options: [.new, .old], context: nil)
         
         addObserver(self,
-                    forKeyPath: #keyPath(PagecallWebView.estimatedProgress),
+                    forKeyPath: #keyPath(WKWebView.estimatedProgress),
                     options: .new,
                     context: nil)
         
         addObserver(self,
-                    forKeyPath: #keyPath(PagecallWebView.url),
+                    forKeyPath: #keyPath(WKWebView.url),
                     options: [.new, .old],
                     context: nil)
         
         addObserver(self,
-            forKeyPath: #keyPath(PagecallWebView.title),
+            forKeyPath: #keyPath(WKWebView.title),
             options: [.new, .old],
             context: nil)
         
@@ -589,17 +590,17 @@ public class InAppWebView: PagecallWebView, UIScrollViewDelegate, WKUIDelegate, 
     
     override public func observeValue(forKeyPath keyPath: String?, of object: Any?,
                                change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-        if keyPath == #keyPath(PagecallWebView.estimatedProgress) {
+        if keyPath == #keyPath(WKWebView.estimatedProgress) {
             initializeWindowIdJS()
             let progress = Int(estimatedProgress * 100)
             onProgressChanged(progress: progress)
             inAppBrowserDelegate?.didChangeProgress(progress: estimatedProgress)
-        } else if keyPath == #keyPath(PagecallWebView.url) && change?[NSKeyValueChangeKey.newKey] is URL {
+        } else if keyPath == #keyPath(WKWebView.url) && change?[NSKeyValueChangeKey.newKey] is URL {
             initializeWindowIdJS()
             let newUrl = change?[NSKeyValueChangeKey.newKey] as? URL
             onUpdateVisitedHistory(url: newUrl?.absoluteString)
             inAppBrowserDelegate?.didUpdateVisitedHistory(url: newUrl)
-        } else if keyPath == #keyPath(PagecallWebView.title) && change?[NSKeyValueChangeKey.newKey] is String {
+        } else if keyPath == #keyPath(WKWebView.title) && change?[NSKeyValueChangeKey.newKey] is String {
             let newTitle = change?[NSKeyValueChangeKey.newKey] as? String
             onTitleChanged(title: newTitle)
             inAppBrowserDelegate?.didChangeTitle(title: newTitle)
@@ -1453,7 +1454,7 @@ public class InAppWebView: PagecallWebView, UIScrollViewDelegate, WKUIDelegate, 
         }
 
     @available(iOS 13.0, *)
-    public func webView(_ webView: PagecallWebView,
+    public func webView(_ webView: WKWebView,
                  decidePolicyFor navigationAction: WKNavigationAction,
                  preferences: WKWebpagePreferences,
                  decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
@@ -1462,7 +1463,7 @@ public class InAppWebView: PagecallWebView, UIScrollViewDelegate, WKUIDelegate, 
         })
     }
     
-    public func webView(_ webView: PagecallWebView,
+    public func webView(_ webView: WKWebView,
                  decidePolicyFor navigationAction: WKNavigationAction,
                  decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         
@@ -1521,7 +1522,7 @@ public class InAppWebView: PagecallWebView, UIScrollViewDelegate, WKUIDelegate, 
         decisionHandler(.allow)
     }
     
-    public func webView(_ webView: PagecallWebView,
+    public func webView(_ webView: WKWebView,
                  decidePolicyFor navigationResponse: WKNavigationResponse,
                  decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
         if navigationResponse.isForMainFrame, let response = navigationResponse.response as? HTTPURLResponse {
@@ -1604,7 +1605,7 @@ public class InAppWebView: PagecallWebView, UIScrollViewDelegate, WKUIDelegate, 
         }
     }
     
-    public func webView(_ webView: PagecallWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+    public func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
         currentOriginalUrl = url
         lastTouchPoint = nil
         
@@ -1620,7 +1621,7 @@ public class InAppWebView: PagecallWebView, UIScrollViewDelegate, WKUIDelegate, 
         inAppBrowserDelegate?.didStartNavigation(url: url)
     }
     
-    public func webView(_ webView: PagecallWebView, didFinish navigation: WKNavigation!) {
+    public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         initializeWindowIdJS()
         
         InAppWebView.credentialsProposed = []
@@ -1639,13 +1640,13 @@ public class InAppWebView: PagecallWebView, UIScrollViewDelegate, WKUIDelegate, 
         inAppBrowserDelegate?.didFinishNavigation(url: url)
     }
     
-    public func webView(_ view: PagecallWebView,
+    public func webView(_ view: WKWebView,
                  didFailProvisionalNavigation navigation: WKNavigation!,
                  withError error: Error) {
         webView(view, didFail: navigation, withError: error)
     }
     
-    public func webView(_ webView: PagecallWebView, didFail navigation: WKNavigation!, withError error: Error) {
+    public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         InAppWebView.credentialsProposed = []
         
         var urlError = url?.absoluteString
@@ -1663,7 +1664,7 @@ public class InAppWebView: PagecallWebView, UIScrollViewDelegate, WKUIDelegate, 
         inAppBrowserDelegate?.didFailNavigation(url: url, error: error)
     }
     
-    public func webView(_ webView: PagecallWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+    public func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         
         if windowId != nil, !windowCreated {
             completionHandler(.cancelAuthenticationChallenge, nil)
@@ -1946,7 +1947,7 @@ public class InAppWebView: PagecallWebView, UIScrollViewDelegate, WKUIDelegate, 
         presentingViewController.present(alertController, animated: true, completion: {})
     }
     
-    public func webView(_ webView: PagecallWebView, runJavaScriptAlertPanelWithMessage message: String,
+    public func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String,
                  initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
         
         if (isPausedTimers) {
@@ -2028,7 +2029,7 @@ public class InAppWebView: PagecallWebView, UIScrollViewDelegate, WKUIDelegate, 
         presentingViewController.present(confirmController, animated: true, completion: nil)
     }
     
-    public func webView(_ webView: PagecallWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo,
+    public func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo,
                  completionHandler: @escaping (Bool) -> Void) {
 
         var completionHandlerCalled = false
@@ -2121,7 +2122,7 @@ public class InAppWebView: PagecallWebView, UIScrollViewDelegate, WKUIDelegate, 
         presentingViewController.present(promptController, animated: true, completion: nil)
     }
     
-    public func webView(_ webView: PagecallWebView, runJavaScriptTextInputPanelWithPrompt message: String, defaultText defaultValue: String?, initiatedByFrame frame: WKFrameInfo,
+    public func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt message: String, defaultText defaultValue: String?, initiatedByFrame frame: WKFrameInfo,
                  completionHandler: @escaping (String?) -> Void) {
         var completionHandlerCalled = false
         let decisionHandlerCrashAvoider = DecisionHandlerCrashAvoider()
@@ -2238,10 +2239,10 @@ public class InAppWebView: PagecallWebView, UIScrollViewDelegate, WKUIDelegate, 
         }
     }
     
-    public func webView(_ webView: PagecallWebView,
+    public func webView(_ webView: WKWebView,
                         createWebViewWith configuration: WKWebViewConfiguration,
                   for navigationAction: WKNavigationAction,
-                  windowFeatures: WKWindowFeatures) -> PagecallWebView? {
+                  windowFeatures: WKWindowFeatures) -> WKWebView? {
         InAppWebView.windowAutoincrementId += 1
         let windowId = InAppWebView.windowAutoincrementId
         
@@ -2289,7 +2290,7 @@ public class InAppWebView: PagecallWebView, UIScrollViewDelegate, WKUIDelegate, 
         return windowWebView
     }
     
-    public func webView(_ webView: PagecallWebView,
+    public func webView(_ webView: WKWebView,
                         authenticationChallenge challenge: URLAuthenticationChallenge,
                         shouldAllowDeprecatedTLS decisionHandler: @escaping (Bool) -> Void) {
         if windowId != nil, !windowCreated {
@@ -2344,21 +2345,21 @@ public class InAppWebView: PagecallWebView, UIScrollViewDelegate, WKUIDelegate, 
         })
     }
     
-    public func webViewDidClose(_ webView: PagecallWebView) {
+    public func webViewDidClose(_ webView: WKWebView) {
         let arguments: [String: Any?] = [:]
         channel?.invokeMethod("onCloseWindow", arguments: arguments)
     }
     
-    public func webViewWebContentProcessDidTerminate(_ webView: PagecallWebView) {
+    public func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
         onWebContentProcessDidTerminate()
     }
     
-    public func webView(_ webView: PagecallWebView,
+    public func webView(_ webView: WKWebView,
                         didCommit navigation: WKNavigation!) {
         onPageCommitVisible(url: url?.absoluteString)
     }
     
-    public func webView(_ webView: PagecallWebView,
+    public func webView(_ webView: WKWebView,
                         didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
         onDidReceiveServerRedirectForProvisionalNavigation()
     }
@@ -2694,8 +2695,8 @@ if(window.\(JAVASCRIPT_BRIDGE_NAME)[\(_callHandlerID)] != null) {
 //        channel?.invokeMethod("onContextMenuWillPresentForElement", arguments: arguments)
 //    }
     
-    public override func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        super.userContentController(userContentController, didReceive: message)
+    public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+//        super.userContentController(userContentController, didReceive: message)
         if message.name.starts(with: "console") {
             var messageLevel = 1
             switch (message.name) {
@@ -3047,9 +3048,9 @@ if(window.\(JAVASCRIPT_BRIDGE_NAME)[\(_callHandlerID)] != null) {
     public override func dispose() {
         super.dispose()
         channel = nil
-        removeObserver(self, forKeyPath: #keyPath(PagecallWebView.estimatedProgress))
-        removeObserver(self, forKeyPath: #keyPath(PagecallWebView.url))
-        removeObserver(self, forKeyPath: #keyPath(PagecallWebView.title))
+        removeObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress))
+        removeObserver(self, forKeyPath: #keyPath(WKWebView.url))
+        removeObserver(self, forKeyPath: #keyPath(WKWebView.title))
         scrollView.removeObserver(self, forKeyPath: #keyPath(UIScrollView.contentOffset))
         scrollView.removeObserver(self, forKeyPath: #keyPath(UIScrollView.zoomScale))
         resumeTimers()
