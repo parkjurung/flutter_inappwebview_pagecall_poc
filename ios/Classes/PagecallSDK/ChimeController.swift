@@ -12,30 +12,13 @@ import Foundation
 class ChimeController {
     let emitter: WebViewEmitter
     var chimeMeetingSession: ChimeMeetingSession?
-    let audioRecorder: AVAudioRecorder?
+    var audioRecorder: AVAudioRecorder?
 
     init(emitter: WebViewEmitter) {
         self.emitter = emitter
         let audioSession = AVAudioSession.sharedInstance()
         try? audioSession.setCategory(.playAndRecord, mode: .default, options: [.mixWithOthers, .allowBluetooth])
 
-        let documentPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        let audioFilename = documentPath.appendingPathComponent("nothing.m4a")
-        let settings = [
-            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
-            AVSampleRateKey: 12000,
-            AVNumberOfChannelsKey: 1,
-            AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
-        ]
-
-        do {
-            let audioRecorder = try AVAudioRecorder(url: audioFilename, settings: settings)
-            self.audioRecorder = audioRecorder
-            audioRecorder.isMeteringEnabled = true
-            audioRecorder.record()
-        } catch {
-            self.audioRecorder = nil
-        }
     }
 
     func createMeetingSession(joinMeetingData: Data, callback: (Error?) -> Void) {
@@ -65,17 +48,32 @@ class ChimeController {
         return level / (highLevel - lowLevel) // scaled to 0.0 ~ 1
     }
 
-    func requestAudioVolume(callback: @escaping (Float?, Error?) -> Void) {
-        guard let audioRecorder = audioRecorder else {
-            callback(nil, NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "AudioRecorder is not exist"]))
-            return
-        }
-        audioRecorder.updateMeters()
-        let averagePower = audioRecorder.averagePower(forChannel: 0)
-        let nomalizedVolume = normalizeSoundLevel(level: averagePower)
-        callback(nomalizedVolume, nil)
-    }
 
+    func requestAudioVolume(callback: @escaping (Float?, Error?) -> Void) {
+        if let audioRecorder = audioRecorder {
+            audioRecorder.updateMeters()
+            let averagePower = audioRecorder.averagePower(forChannel: 0)
+            let nomalizedVolume = normalizeSoundLevel(level: averagePower)
+            callback(nomalizedVolume, nil)
+            return;
+        }
+        do {
+            let documentPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            let audioFilename = documentPath.appendingPathComponent("nothing.m4a")
+            let settings = [
+                AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+                AVSampleRateKey: 12000,
+                AVNumberOfChannelsKey: 1,
+                AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
+            ]
+            let audioRecorder = try AVAudioRecorder(url: audioFilename, settings: settings)
+            self.audioRecorder = audioRecorder
+            audioRecorder.isMeteringEnabled = true
+            audioRecorder.record()
+        } catch {
+            callback(nil, NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "AudioRecorder is not exist"]))
+        }
+    }
     func start(callback: (Error?) -> Void) {
         if let chimeMeetingSession = chimeMeetingSession {
             chimeMeetingSession.start { (error: Error?) in
@@ -90,8 +88,11 @@ class ChimeController {
             callback(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "ChimeMeetingSession not exist"]))
         }
     }
-
     func stop(callback: (Error?) -> Void) {
+        if let audioRecorder = audioRecorder{
+            audioRecorder.stop();
+            self.audioRecorder = nil;
+        }
         if let chimeMeetingSession = chimeMeetingSession {
             chimeMeetingSession.stop()
             callback(nil)
@@ -99,7 +100,6 @@ class ChimeController {
             callback(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "ChimeMeetingSession not exist"]))
         }
     }
-
     func getPermissions(constraint: Data, callback: (Error?) -> Void) -> Data? {
         struct MediaType: Codable {
             var audio: Bool?

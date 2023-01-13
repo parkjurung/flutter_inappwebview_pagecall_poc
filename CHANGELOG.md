@@ -21,3 +21,7 @@
 ## 0.0.8
 
 - fix AmazonChimeSDK(-Media) version
+
+## 0.0.9
+
+- recordAudio onDemand
