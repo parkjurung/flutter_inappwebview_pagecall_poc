@@ -39,6 +39,13 @@ class ChimeController {
         callback(nil)
     }
 
+    public func deleteMeetingSession() {
+        if let chimeMeetingSession = chimeMeetingSession {
+            chimeMeetingSession.dispose()
+            self.chimeMeetingSession = nil
+        }
+    }
+
     private func normalizeSoundLevel(level: Float) -> Float {
         let lowLevel: Float = -40
         let highLevel: Float = -10
@@ -48,14 +55,13 @@ class ChimeController {
         return level / (highLevel - lowLevel) // scaled to 0.0 ~ 1
     }
 
-
     func requestAudioVolume(callback: @escaping (Float?, Error?) -> Void) {
         if let audioRecorder = audioRecorder {
             audioRecorder.updateMeters()
             let averagePower = audioRecorder.averagePower(forChannel: 0)
             let nomalizedVolume = normalizeSoundLevel(level: averagePower)
             callback(nomalizedVolume, nil)
-            return;
+            return
         }
         do {
             let documentPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
@@ -70,10 +76,16 @@ class ChimeController {
             self.audioRecorder = audioRecorder
             audioRecorder.isMeteringEnabled = true
             audioRecorder.record()
+
+            audioRecorder.updateMeters()
+            let averagePower = audioRecorder.averagePower(forChannel: 0)
+            let nomalizedVolume = normalizeSoundLevel(level: averagePower)
+            callback(nomalizedVolume, nil)
         } catch {
             callback(nil, NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "AudioRecorder is not exist"]))
         }
     }
+
     func start(callback: (Error?) -> Void) {
         if let chimeMeetingSession = chimeMeetingSession {
             chimeMeetingSession.start { (error: Error?) in
@@ -88,10 +100,11 @@ class ChimeController {
             callback(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "ChimeMeetingSession not exist"]))
         }
     }
+
     func stop(callback: (Error?) -> Void) {
-        if let audioRecorder = audioRecorder{
-            audioRecorder.stop();
-            self.audioRecorder = nil;
+        if let audioRecorder = audioRecorder {
+            audioRecorder.stop()
+            self.audioRecorder = nil
         }
         if let chimeMeetingSession = chimeMeetingSession {
             chimeMeetingSession.stop()
@@ -100,6 +113,7 @@ class ChimeController {
             callback(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "ChimeMeetingSession not exist"]))
         }
     }
+
     func getPermissions(constraint: Data, callback: (Error?) -> Void) -> Data? {
         struct MediaType: Codable {
             var audio: Bool?

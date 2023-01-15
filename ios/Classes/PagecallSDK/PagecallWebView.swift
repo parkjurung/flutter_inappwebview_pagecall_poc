@@ -3,31 +3,30 @@ import WebKit
 public class PagecallWebView: WKWebView, WKScriptMessageHandler {
     var nativeBridge: NativeBridge?
     var controllerName = "pagecall"
-    
+
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("PagecallSDK: PagecallWebView cannot be instantiated from a storyboard")
     }
-    
+
     override public init(frame: CGRect, configuration: WKWebViewConfiguration) {
         let contentController = WKUserContentController()
-//
-         configuration.mediaTypesRequiringUserActionForPlayback = []
-         configuration.allowsInlineMediaPlayback = true
-         configuration.suppressesIncrementalRendering = false
-//         configuration.applicationNameForUserAgent = "PagecallIos" // << 이게 활성화되면 페이지콜 무한로딩 됨
-         configuration.allowsAirPlayForMediaPlayback = true
+
+        configuration.mediaTypesRequiringUserActionForPlayback = []
+        configuration.allowsInlineMediaPlayback = true
+        configuration.suppressesIncrementalRendering = false
+        // configuration.applicationNameForUserAgent = "PagecallIos" // << 이게 활성화되면 페이지콜 무한로딩 됨
+        configuration.allowsAirPlayForMediaPlayback = true
         configuration.userContentController = contentController
-        
+
         // if #available(iOS 13.0, *) {
         //     configuration.defaultWebpagePreferences.preferredContentMode = .mobile
         // }
-//         if #available(iOS 14.0, *) {
-//             configuration.limitsNavigationsToAppBoundDomains = true
-//         }
+        // if #available(iOS 14.0, *) {
+        //     configuration.limitsNavigationsToAppBoundDomains = true
+        // }
         super.init(frame: frame, configuration: configuration)
-        self.nativeBridge = .init(webview: self)
-        
+
         self.allowsBackForwardNavigationGestures = false
         
 //        if #available(iOS 15.0, *) {
@@ -39,16 +38,15 @@ public class PagecallWebView: WKWebView, WKScriptMessageHandler {
             if let bindingJS = try? String(contentsOfFile: path, encoding: .utf8) {
                 let script = WKUserScript(source: bindingJS, injectionTime: .atDocumentStart, forMainFrameOnly: false)
                 contentController.addUserScript(script)
-                print("Success JS");
             }
         } else {
             NSLog("Failed to add PagecallNative script")
             return
         }
-        
+
         contentController.add(self, name: self.controllerName)
     }
-    
+
     public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         switch message.name {
         case self.controllerName:
@@ -59,6 +57,20 @@ public class PagecallWebView: WKWebView, WKScriptMessageHandler {
             break
         }
     }
-    
-    public func dispose() {}
+
+    public override func didMoveToSuperview() {
+        if self.superview == nil {
+            self.nativeBridge?.disconnect()
+            self.nativeBridge = nil
+            return
+        }
+
+        if self.nativeBridge == nil {
+            self.nativeBridge = .init(webview: self)
+        }
+    }
+
+    public func dispose() {
+        self.nativeBridge?.disconnect()
+    }
 }
