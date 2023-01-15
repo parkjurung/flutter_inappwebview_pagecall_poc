@@ -25,3 +25,8 @@
 ## 0.0.9
 
 - recordAudio onDemand
+
+
+## 0.0.10
+
+- webview cleaned up well
