@@ -471,6 +471,8 @@ public class InAppWebView: PagecallWebView, UIScrollViewDelegate, WKUIDelegate, 
         configuration.userContentController.add(self, name: "onWebMessagePortMessageReceived")
         configuration.userContentController.removeScriptMessageHandler(forName: "onWebMessageListenerPostMessageReceived")
         configuration.userContentController.add(self, name: "onWebMessageListenerPostMessageReceived")
+        configuration.userContentController.removeScriptMessageHandler(forName: "pagecall")
+        configuration.userContentController.add(self, name: "pagecall")
         configuration.userContentController.addUserOnlyScripts(initialUserScripts)
         configuration.userContentController.sync(scriptMessageHandler: self)
     }

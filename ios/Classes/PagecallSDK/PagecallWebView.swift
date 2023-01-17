@@ -10,14 +10,17 @@ public class PagecallWebView: WKWebView, WKScriptMessageHandler {
     }
 
     override public init(frame: CGRect, configuration: WKWebViewConfiguration) {
-        let contentController = WKUserContentController()
+        // let contentController = WKUserContentController()
+//        let newConfiguration = configuration.copy() as! WKWebViewConfiguration
+        let newConfiguration = configuration.copy() as! WKWebViewConfiguration
+        let contentController = newConfiguration.userContentController
 
-        configuration.mediaTypesRequiringUserActionForPlayback = []
-        configuration.allowsInlineMediaPlayback = true
-        configuration.suppressesIncrementalRendering = false
+        newConfiguration.mediaTypesRequiringUserActionForPlayback = []
+        newConfiguration.allowsInlineMediaPlayback = true
+        newConfiguration.suppressesIncrementalRendering = false
         // configuration.applicationNameForUserAgent = "PagecallIos" // << 이게 활성화되면 페이지콜 무한로딩 됨
-        configuration.allowsAirPlayForMediaPlayback = true
-        configuration.userContentController = contentController
+        newConfiguration.allowsAirPlayForMediaPlayback = true
+        newConfiguration.userContentController = contentController
 
         // if #available(iOS 13.0, *) {
         //     configuration.defaultWebpagePreferences.preferredContentMode = .mobile
@@ -25,7 +28,7 @@ public class PagecallWebView: WKWebView, WKScriptMessageHandler {
         // if #available(iOS 14.0, *) {
         //     configuration.limitsNavigationsToAppBoundDomains = true
         // }
-        super.init(frame: frame, configuration: configuration)
+        super.init(frame: frame, configuration: newConfiguration)
 
         self.allowsBackForwardNavigationGestures = false
         
@@ -43,8 +46,10 @@ public class PagecallWebView: WKWebView, WKScriptMessageHandler {
             NSLog("Failed to add PagecallNative script")
             return
         }
-
-        contentController.add(self, name: self.controllerName)
+        
+//        contentController.removeScriptMessageHandler(forName: self.controllerName)
+//        contentController.add(self, name: self.controllerName)
+     
     }
 
     public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
@@ -72,5 +77,6 @@ public class PagecallWebView: WKWebView, WKScriptMessageHandler {
 
     public func dispose() {
         self.nativeBridge?.disconnect()
+        self.nativeBridge = nil
     }
 }
