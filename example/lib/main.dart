@@ -123,11 +123,6 @@ class _InAppWebViewPageState extends State<InAppWebViewPage> {
                             android: AndroidInAppWebViewOptions(
                                 supportMultipleWindows: true)),
                         onLoadStart: (controller, url) {
-                          print("onLoadStart: $url");
-                          if (url.toString().contains("app.pagecall")) {
-
-                            return;
-                          }
                           if (url != null) {
                             pageType = url.queryParameters['pageType'];
                             if (pageType != null && pageType!.isNotEmpty) {
@@ -140,11 +135,7 @@ class _InAppWebViewPageState extends State<InAppWebViewPage> {
                         shouldOverrideUrlLoading:
                           (controller, navigationAction) async {
                         var uri = navigationAction.request.url;
-                        print('pagecall uri $uri');
-                        var uriStr = uri.toString();
-                        print('pagecall uriStr $uriStr');
                         if (uri.toString().contains("app.pagecall")) {
-                          print("!!pagecall!!!");
                           return NavigationActionPolicy.CANCEL; 
                         }
                         return NavigationActionPolicy.ALLOW;

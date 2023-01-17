@@ -30,3 +30,7 @@
 ## 0.0.10
 
 - webview cleaned up well
+
+## 0.0.11
+
+- add channel outside of PagecallWebView, reuse WKWebViewConfiguration
