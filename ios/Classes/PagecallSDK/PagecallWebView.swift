@@ -60,6 +60,9 @@ public class PagecallWebView: WKWebView, WKScriptMessageHandler {
 
     public override func didMoveToSuperview() {
         if self.superview == nil {
+            if let url = URL(string: "about:blank") {
+                self.load(URLRequest(url: url))
+            }
             self.nativeBridge?.disconnect()
             self.nativeBridge = nil
             return
@@ -72,5 +75,6 @@ public class PagecallWebView: WKWebView, WKScriptMessageHandler {
 
     public func dispose() {
         self.nativeBridge?.disconnect()
+        self.nativeBridge = nil
     }
 }
