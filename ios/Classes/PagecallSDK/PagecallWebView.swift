@@ -3,14 +3,14 @@ import WebKit
 public class PagecallWebView: WKWebView, WKScriptMessageHandler {
     var nativeBridge: NativeBridge?
     var controllerName = "pagecall"
-
+    let contentController = WKUserContentController()
+    
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("PagecallSDK: PagecallWebView cannot be instantiated from a storyboard")
     }
 
     override public init(frame: CGRect, configuration: WKWebViewConfiguration) {
-        let contentController = WKUserContentController()
 
         configuration.mediaTypesRequiringUserActionForPlayback = []
         configuration.allowsInlineMediaPlayback = true
@@ -60,11 +60,7 @@ public class PagecallWebView: WKWebView, WKScriptMessageHandler {
 
     public override func didMoveToSuperview() {
         if self.superview == nil {
-            if let url = URL(string: "about:blank") {
-                self.load(URLRequest(url: url))
-            }
-            self.nativeBridge?.disconnect()
-            self.nativeBridge = nil
+            self.disposePagecall()
             return
         }
 
@@ -73,8 +69,12 @@ public class PagecallWebView: WKWebView, WKScriptMessageHandler {
         }
     }
 
-    public func dispose() {
+    private func disposePagecall() {
         self.nativeBridge?.disconnect()
         self.nativeBridge = nil
+        self.contentController.removeScriptMessageHandler(forName: self.controllerName)
+    }
+    public func dispose() {
+        self.disposePagecall()
     }
 }

@@ -38,3 +38,7 @@
 ## 0.0.12
 
 - dispose & init controller, deal with audio session #10
+
+## 0.0.13
+
+- removeScriptMessageHandler for pagecall
