@@ -34,3 +34,7 @@
 ## 0.0.11
 
 - add channel outside of PagecallWebView, reuse WKWebViewConfiguration
+
+## 0.0.12
+
+- dispose & init controller, deal with audio session #10
