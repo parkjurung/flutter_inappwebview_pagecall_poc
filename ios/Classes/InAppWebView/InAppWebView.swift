@@ -1452,6 +1452,8 @@ public class InAppWebView: PagecallWebView, UIScrollViewDelegate, WKUIDelegate, 
         public func webView(_ webView: WKWebView, requestMediaCapturePermissionFor origin: WKSecurityOrigin, initiatedByFrame frame: WKFrameInfo, type: WKMediaCaptureType, decisionHandler: @escaping (WKPermissionDecision) -> Void) {
             decisionHandler(.grant)
         }
+    
+    private var isInitialLoad = true
 
     @available(iOS 13.0, *)
     public func webView(_ webView: WKWebView,
@@ -1459,6 +1461,14 @@ public class InAppWebView: PagecallWebView, UIScrollViewDelegate, WKUIDelegate, 
                  preferences: WKWebpagePreferences,
                  decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
         self.webView(webView, decidePolicyFor: navigationAction, decisionHandler: {(navigationActionPolicy) -> Void in
+            if let urlString = webView.url?.absoluteString, urlString.contains("app.pagecall") {
+                if !self.isInitialLoad {
+                    decisionHandler(.cancel, preferences)
+                    return
+                } else {
+                    self.isInitialLoad = false
+                }
+            }
             decisionHandler(navigationActionPolicy, preferences)
         })
     }
